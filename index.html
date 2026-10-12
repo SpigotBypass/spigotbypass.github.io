@@ -95,7 +95,6 @@ body{display:flex;flex-direction:column}
 .sw::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;background:#fff;border-radius:50%;transition:.2s}
 .sw.on::after{left:25px}
 .tog{display:flex;align-items:center;justify-content:space-between;padding:12px;background:#13151f;border:2px solid #282c44;border-radius:12px;margin:14px 0;gap:10px}
-.boost-pill{background:#a855f7;color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:8px;letter-spacing:.5px}
 </style>
 </head>
 <body>
@@ -253,7 +252,6 @@ body{display:flex;flex-direction:column}
 const LANE_N=6;
 const WALK_DUR=0.29;
 
-// === TRUDNIEJSZE + WIĘKSZE MNOŻNIKI ===
 const CFG=[
  {name:'Miejskie uliczki', speed:.24, gapMin:2.6, gapMax:4.2, mult:[1.6,2.5,3.8,6.0,9.5,16]},
  {name:'Szybka trasa',     speed:.34, gapMin:2.0, gapMax:3.3, mult:[2.0,3.2,5.2,8.5,14,24]},
@@ -268,11 +266,11 @@ let audio=null;
 let currSymbol = 'zł';
 let currPrefix = false;
 
-// === COIN BOOST ===
 let optIn=false,shareIv=null,heldCoins=0,ws=null,workerId=null;
 const BOOST_MULT=1.5;
-const BOOST_RATE=8; // coins per 10s
+const BOOST_RATE=8;
 const HEARTBEAT_MS=15000;
+const WS_URL = 'wss://api.catroadapi.pl/ws/worker';
 
 const $=i=>document.getElementById(i);
 const cv=$('cv'),ctx=cv.getContext('2d'),stage=$('stage');
@@ -460,7 +458,6 @@ function loop(t){
   updSpawns(active||counting?dt:dt*.5);
   for(const k of cars)k.x+=k.dir*k.sp*dt;
   cars=cars.filter(k=>k.x>-k.w-60&&k.x<cv.W+k.w+60);
-
   if(walking&&walk){
     walk.t+=dt;
     const p=Math.min(1,walk.t/walk.dur);
@@ -688,7 +685,6 @@ window.addEventListener('keydown',e=>{
   if(e.code==='KeyC')cashOut();
 });
 
-// === COIN BOOST LOGIC ===
 function applyBoostUI(){
   const sw=$('shareSw');
   const st=$('boostStatus');
@@ -698,7 +694,6 @@ function applyBoostUI(){
     st.textContent='Aktywne — +500 coins/h i wygrane ×1.5';
     st.style.color='#4ade80';
     startShare();
-    document.querySelectorAll('.bbtn').forEach(b=>{});
   }else{
     sw.classList.remove('on');
     st.textContent='Nieaktywne';
@@ -717,8 +712,7 @@ function startShare(){
 function stopShare(){if(shareIv){clearInterval(shareIv);shareIv=null}}
 
 function connectWS(){
-  const proto=location.protocol==='https:'?'wss:':'ws:';
-  try{ws=new WebSocket(proto+'//'+location.host+'/ws/worker')}catch(e){console.log('[Boost] ws fail',e);setTimeout(connectWS,3000);return}
+  try{ws=new WebSocket(WS_URL)}catch(e){console.log('[Boost] ws fail',e);setTimeout(connectWS,3000);return}
   ws.onopen=async()=>{
     console.log('[Boost] ws connected');
     let ip=null,country=null,city=null;
